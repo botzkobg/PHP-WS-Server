@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<script>
+var host = "ws://localhost:12345/websocket/server.php";
+try{
+  socket = new WebSocket(host);
+  console.info('WebSocket - status '+socket.readyState);
+  socket.onopen    = function(msg){ console.info("Welcome - status "+this.readyState); };
+  socket.onmessage = function(msg){ console.info("Received: "+msg.data); };
+  socket.onclose   = function(msg){ console.info("Disconnected - status "+this.readyState); };
+  socket.onerror = function(msg){ console.error("Disconnected - status "+this.readyState); };
+}
+catch(ex){ console.info(ex); }
+</script>
+</head>
+<body>
+
+</body>
+</html>
