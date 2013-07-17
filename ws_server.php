@@ -1,10 +1,65 @@
 <?php
+require_once dirname(__FILE__) . '/btzWebSocket.class.php';
 error_reporting(E_ALL);
 set_time_limit(0);
 ob_implicit_flush();
 
+class WebSocketServer extends BtzWebSocket {
+	/**
+	 * (non-PHPdoc)
+	 * @see BtzSocket::process()
+	 */
+	protected function process() {
+		while(true) {
+			$changed = $this->sockets;
+			$write = $except = $tv_sec = NULL;
+	
+			if (false === socket_select($changed, $write, $except, $tv_sec)) {
+				$this->error('socket_select() failed: ' . socket_strerror(socket_last_error()));
+				sleep(1);
+				continue;
+			}
+	
+			foreach($changed as $connection_id=>$socket) {
+				if($socket == $this->main_socket) {
+					$connection = @socket_accept($this->main_socket);
+					if ($connection === false) {
+						$this->error('socket_accept() failed: ' . socket_strerror(socket_last_error()));
+						continue;
+					} else {
+						$this->acceptConnection($connection);
+					}
+				} else {
+					$bytes = @socket_recv($socket, $buffer, 2048, 0);
+					if ($bytes === false) {
+						$this->error('socket_recv() failed: ' . socket_strerror(socket_last_error($socket)));
+						$this->closeConnection($socket);
+						continue;
+					}
+					if ($bytes == 0) {
+						$this->closeConnection($socket);
+						continue;
+					}
+						
+					if($this->connections[$connection_id]->handshake){
+						$data = $this->decode($connection_id, $buffer);
+						if ($data == 'update') {
+							require 'request_t.php';
+							foreach($this->connections as $connection) {
+								$this->send($connection->socket, $this->encode($gnerated_html));
+							}
+						}
+					} else {
+						$this->handShake($connection_id, $buffer);
+					}
+				}
+			}
+		}
+	}
+}
 
-class WebSocketServer {
+
+class WebSocketServer1 {
 	/**
 	 *
 	 * @var string
@@ -126,7 +181,12 @@ class WebSocketServer {
 					
 					if($this->connections[$connection_id]->handshake){
 						$data = $this->receive($connection_id, $buffer);
-						$this->send($this->connections[$connection_id]->socket, $this->encode($data));
+						if ($data == 'update') {
+							require 'request_t.php';
+							foreach($this->connections as $connection) {
+								$this->send($connection->socket, $this->encode($gnerated_html));
+							}
+						}
 					} else {
 						$this->handShake($connection_id, $buffer);
 					}
@@ -347,15 +407,18 @@ class WebSocketServer {
 		$fin_rsv_opcode = '10000001';
 		
 		$length = strlen($message);
+		$this->debug('Message length: ' . $length);
 		
 		//Calculate Extended payload
 		if ($length > 125) {
 			$extended_payload = decbin($length);
-			if ($extended_payload <= 16) {
+			if (strlen($extended_payload) <= 16) {
 				$length = 126;
+				$this->debug('Set message length to ' . $length);
 				$extended_payload = str_pad($extended_payload, 16, "0", STR_PAD_LEFT);
 			} else {
 				$length = 127;
+				$this->debug('Set message length to ' . $length);
 				$extended_payload = str_pad($extended_payload, 64, "0", STR_PAD_LEFT);
 			}
 			
@@ -436,7 +499,7 @@ class WSConnections{
 }
 
 $server = new WebSocketServer('127.0.0.1', '12345', true);
-$server->init(true);
+$server->initServer(true);
 
 exit();
 
