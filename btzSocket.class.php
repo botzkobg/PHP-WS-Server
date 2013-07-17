@@ -67,7 +67,6 @@ abstract class BtzSocket {
 			throw new Exception('socket_create() faild');
 		}
 	
-	
 		if (socket_set_option($this->main_socket, SOL_SOCKET, SO_REUSEADDR, 1) === false) {
 			throw new Exception("socket_option() failed");
 		}
@@ -128,6 +127,57 @@ abstract class BtzSocket {
 	 */
 	public function stopServer() {
 	
+	}
+	
+	/**
+	 * Initzialize client
+	 *
+	 * Prepare socket to connect
+	 *
+	 * @param boolean $connect
+	 * @return BtzSocket
+	 * @throws Exception
+	 */
+	public function initClient($connect = false) {
+		$this->main_socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+		if ($this->main_socket === false) {
+			throw new Exception('socket_create() faild');
+		}
+		
+		if ($connect) {
+			$this->requestConnection();
+		}
+		
+		return $this;
+	}
+	
+	/**
+	 * Request connection
+	 *
+	 * Before you request connection method initClient must be called
+	 * to prepare the socket.
+	 *
+	 * @return BtzSocket
+	 * @throws Exception
+	 */
+	public function requestConnection() {
+		if (socket_connect($this->main_socket, $this->address, $this->port) === false) {
+			throw new Exception("socket_connect() failed:" .  socket_strerror(socket_last_error($this->main_socket)));
+		}
+
+		return $this;
+	}
+	
+	/**
+	 * Send message to server
+	 * 
+	 * @param string $message
+	 * @return BtzSocket
+	 */
+	public function sendToServer($message) {
+		$this->send($this->main_socket, $message);
+		
+		return $this;
 	}
 	
 	/**
