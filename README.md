@@ -10,3 +10,8 @@ ws_client.html is the client part.
 These scripts are ready to use. Just run the server and open the client in the browser.
 
 NOTE: Parts of the standart are not implemented.
+
+
+server.php and client.php are script to test simple socket connection.
+
+
