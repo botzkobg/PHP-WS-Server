@@ -282,7 +282,7 @@ abstract class BtzSocket {
 	 * @param string $message
 	 */
 	protected function info($message) {
-		$this->output('\033[0;32mINFO: ' . $message . '\033[0m');
+		$this->output("\033[0;32mINFO: " . $message . "\033[0m");
 	}
 
 	/**
@@ -291,7 +291,7 @@ abstract class BtzSocket {
 	 * @param string $message
 	 */
 	protected function warning($message) {
-		$this->output('\033[1;33mWARNING: ' . $message . '\033[0m');
+		$this->output("\033[1;33mWARNING: " . $message . "\033[0m");
 	}
 
 	/**
@@ -300,7 +300,7 @@ abstract class BtzSocket {
 	 * @param string $message
 	 */
 	protected function error($message) {
-		$this->output('\033[0;31mERROR: ' . $message . '\033[0m');
+		$this->output("\033[0;31mERROR: " . $message . "\033[0m");
 	}
 
 	/**

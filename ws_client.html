@@ -11,7 +11,7 @@ try{
   socket.onopen    = function(msg){ console.info("Welcome - status "+this.readyState); };
   socket.onmessage = function(msg){ 
 	  console.info("Received: "+msg.data);
-	  html = msg.data;
+	  var html = hex_to_str(msg.data);
 	  document.getElementById('request_div').innerHTML = html;
 	};
   socket.onclose   = function(msg){ console.info("Disconnected - status "+this.readyState); };

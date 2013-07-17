@@ -68,7 +68,8 @@ class WebSocketServer extends BtzWebSocket {
 						$this->debug('< ' . $data);
 						
 						if ($data == 'update') {
-							$gnerated_html = 'include your code to generate updates';
+// 							require 'request_t.php';
+							$gnerated_html = 'Put your logic here to generate updates';
 							foreach($this->connections as $connection) {
 								if ($connection->internal == true) {
 									continue;

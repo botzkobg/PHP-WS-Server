@@ -31,8 +31,8 @@ abstract class BtzWebSocket extends BtzSocket {
 	 * @param string $buffer
 	 */
 	public function handShake($connection_id, $buffer) {
-		$this->info('Start handshake ...');
-		$this->info('GUID: ' . $this::GUID);
+		$this->debug('Start handshake ...');
+		$this->debug('GUID: ' . $this::GUID);
 	
 		$handshake = array();
 		preg_match('/Sec-WebSocket-Key: (.*)/', $buffer, $web_socket_key);
