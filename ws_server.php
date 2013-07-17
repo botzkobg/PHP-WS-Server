@@ -44,9 +44,8 @@ class WebSocketServer extends BtzWebSocket {
 					if($this->connections[$connection_id]->handshake){
 						$data = $this->decode($connection_id, $buffer);
 						if ($data == 'update') {
-							require 'request_t.php';
 							foreach($this->connections as $connection) {
-								$this->send($connection->socket, $this->encode($gnerated_html));
+								$this->send($connection->socket, $data);
 							}
 						}
 					} else {

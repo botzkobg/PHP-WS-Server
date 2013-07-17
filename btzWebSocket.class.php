@@ -9,7 +9,21 @@ abstract class BtzWebSocket extends BtzSocket {
 	const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
 	
 	/**
+	 * Send data
+	 * 
+	 * Before send the message it must be encoded by The WebSocket Protocol RFC: 6455
+	 *
+	 * @param socket resource $socket
+	 * @param string $message
+	 */
+	protected function send($socket, $message) {
+		parent::send($socket, $this->encode($message));
+	}
+	
+	/**
 	 * Handshake process
+	 * 
+	 * Send headers to the client. Headers are not encoded.
 	 * 
 	 * Buffer is received data from the client(Request headers).
 	 * 
@@ -43,7 +57,7 @@ abstract class BtzWebSocket extends BtzSocket {
 				"Connection: Upgrade\r\n" .
 				"Sec-WebSocket-Accept: " . base64_encode($handshake['SH1']) . "\r\n\r\n";
 	
-		$this->send($this->connections[$connection_id]->socket, $response);
+		parent::send($this->connections[$connection_id]->socket, $response);
 		$this->connections[$connection_id]->handshake = true;
 	}
 	
