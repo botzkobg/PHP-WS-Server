@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__FILE__) . '/btzWebSocket.class.php';
+
 error_reporting(E_ALL);
 set_time_limit(0);
 ob_implicit_flush();
@@ -27,10 +28,26 @@ class WebSocketServer extends BtzWebSocket {
 						$this->error('socket_accept() failed: ' . socket_strerror(socket_last_error()));
 						continue;
 					} else {
-						$this->acceptConnection($connection);
+						$connection_id = $this->acceptConnection($connection);
+						
+						if (socket_getpeername($connection, $IP) === false) {
+							$this->error('socket_getpeername() failed: ' . socket_strerror(socket_last_error()));
+							continue;
+						}
+						
+						$this->debug('Client IP: ' . $IP);
+						
+						if ($IP == '192.168.1.100') {
+							$this->connections[$connection_id]->internal = true;
+							$this->connections[$connection_id]->handshake = true;
+						} else {
+							$this->connections[$connection_id]->internal = false;
+						}
 					}
 				} else {
+					$this->debug('Receiving data ...');
 					$bytes = @socket_recv($socket, $buffer, 2048, 0);
+					$this->debug('Received ' . $bytes . ' bytes');
 					if ($bytes === false) {
 						$this->error('socket_recv() failed: ' . socket_strerror(socket_last_error($socket)));
 						$this->closeConnection($socket);
@@ -42,10 +59,21 @@ class WebSocketServer extends BtzWebSocket {
 					}
 						
 					if($this->connections[$connection_id]->handshake){
-						$data = $this->decode($connection_id, $buffer);
+						if ($this->connections[$connection_id]->internal) {
+							$data = $buffer;
+						} else {
+							$data = $this->decode($connection_id, $buffer);
+						}
+						
+						$this->debug('< ' . $data);
+						
 						if ($data == 'update') {
+							$gnerated_html = 'include your code to generate updates';
 							foreach($this->connections as $connection) {
-								$this->send($connection->socket, $data);
+								if ($connection->internal == true) {
+									continue;
+								}
+								$this->send($connection->socket, $gnerated_html);
 							}
 						}
 					} else {
@@ -57,7 +85,7 @@ class WebSocketServer extends BtzWebSocket {
 	}
 }
 
-$server = new WebSocketServer('127.0.0.1', '12345', true);
+$server = new WebSocketServer('192.168.1.100', '12345', true);
 $server->initServer(true);
 
 exit();

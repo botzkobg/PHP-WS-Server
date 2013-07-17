@@ -187,6 +187,7 @@ abstract class BtzSocket {
 	 * and add socket to socket list.
 	 * 
 	 * @param socket resource $socket
+	 * @return string
 	 */
 	protected function acceptConnection($socket) {
 		$connection_id = uniqid();
@@ -194,6 +195,8 @@ abstract class BtzSocket {
 		$this->connections[$connection_id] = $connection;
 		$this->sockets[$connection_id] = $socket;
 		$this->info('New connection accepted: ' . $socket);
+		
+		return $connection_id;
 	}
 	
 	/**

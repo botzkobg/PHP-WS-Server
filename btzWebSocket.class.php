@@ -127,9 +127,7 @@ abstract class BtzWebSocket extends BtzSocket {
 	protected function decode($connection_id, $buffer) {
 		$message = array('FIN' => '', 'RSV1' => '', 'RSV2' => '', 'RSV3' => '', 'OPTCODE' => '', 'MASK' => '', 'PAYLOAD' => '');
 		$current_position = 0;
-	
-		$this->debug('< ' . $buffer);
-	
+
 		//Decode FIN RSV1 RSV2 RSV3 and OPTCODE
 		$data = decbin(ord($buffer[$current_position++]));
 		$data = str_pad($data, 8, "0", STR_PAD_LEFT);
