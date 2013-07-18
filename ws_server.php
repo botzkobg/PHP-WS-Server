@@ -37,7 +37,7 @@ class WebSocketServer extends BtzWebSocket {
 						
 						$this->debug('Client IP: ' . $IP);
 						
-						if ($IP == '192.168.1.100') {
+						if ($IP == $this->address) {
 							$this->connections[$connection_id]->internal = true;
 							$this->connections[$connection_id]->handshake = true;
 						} else {
@@ -68,8 +68,7 @@ class WebSocketServer extends BtzWebSocket {
 						$this->debug('< ' . $data);
 						
 						if ($data == 'update') {
-// 							require 'request_t.php';
-							$gnerated_html = 'Put your logic here to generate updates';
+							require 'request_t.php';
 							foreach($this->connections as $connection) {
 								if ($connection->internal == true) {
 									continue;
@@ -86,7 +85,7 @@ class WebSocketServer extends BtzWebSocket {
 	}
 }
 
-$server = new WebSocketServer('192.168.1.100', '12345', true);
+$server = new WebSocketServer('192.168.5.66', '12345', true);
 $server->initServer(true);
 
 exit();

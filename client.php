@@ -14,7 +14,7 @@ class ClientSocket extends BtzSocket {
 	}
 }
 
-$client = new ClientSocket('192.168.1.100', '12345', true);
+$client = new ClientSocket('192.168.5.66', '12345', false);
 $client->initClient(true);
 $client->sendToServer('update');
-exit();
+// exit();
