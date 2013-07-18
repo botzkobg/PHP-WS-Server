@@ -33,6 +33,7 @@ abstract class BtzWebSocket extends BtzSocket {
 	public function handShake($connection_id, $buffer) {
 		$this->debug('Start handshake ...');
 		$this->debug('GUID: ' . $this::GUID);
+		$this->debug('< ' . $buffer);
 	
 		$handshake = array();
 		preg_match('/Sec-WebSocket-Key: (.*)/', $buffer, $web_socket_key);
@@ -135,7 +136,7 @@ abstract class BtzWebSocket extends BtzSocket {
 		$message['RSV1'] = substr($data, 1, 1);
 		$message['RSV2'] = substr($data, 2, 1);
 		$message['RSV3'] = substr($data, 3, 1);
-		$message['OPTCODE'] = substr($data, -4);
+		$message['OPTCODE'] = bindec(substr($data, -4));
 		//Decode MASK and PAYLOAD
 		$data = decbin(ord($buffer[$current_position++]));
 		$data = str_pad($data, 8, "0", STR_PAD_LEFT);
@@ -149,26 +150,7 @@ abstract class BtzWebSocket extends BtzSocket {
 			$this->error('Multiple frames are not supported.');
 	
 			return false;
-		}
-	
-		switch ($message['OPTCODE']) {
-			case 0x0: $this->warning('OPTCODE 0 is not implemented!'); break;
-			case 0x1: $this->debug('Data is in text format.'); break;
-			case 0x2: $this->debug('Data is in binary format.'); break;
-			case 0x3:
-			case 0x4:
-			case 0x5:
-			case 0x6:
-			case 0x7: $this->warning("OPTCODE {$message['OPTCODE']} is reserverd!"); break;
-			case 0x8: $this->debug('Connection close request.'); break;
-			case 0x9: $this->debug('Ping request.'); break;
-			case 0xA: $this->debug('Pong response.'); break;
-			case 0xB:
-			case 0xC:
-			case 0xD:
-			case 0xF: $this->warning("OPTCODE {$message['OPTCODE']} is reserverd!"); break;
-			default: $this->error("OPTCODE {$message['OPTCODE']} is reserverd!");
-		}
+		}	
 	
 		$this->debug("Data length:  {$message['PAYLOAD']}b");
 		$message['PAYLOAD'] = bindec($message['PAYLOAD']);
@@ -231,6 +213,34 @@ abstract class BtzWebSocket extends BtzSocket {
 			}
 	
 			$this->debug("Data received: {$data}");
+		}
+		
+		switch ($message['OPTCODE']) {
+			case 0x0: $this->warning('OPTCODE 0 is not implemented!'); break;
+			case 0x1: $this->debug('Data is in text format.'); break;
+			case 0x2: $this->debug('Data is in binary format.'); break;
+			case 0x3:
+			case 0x4:
+			case 0x5:
+			case 0x6:
+			case 0x7: $this->warning("OPTCODE {$message['OPTCODE']} is reserverd!"); break;
+			case 0x8:
+				if ((!empty($data)) && (strlen($data) >= 2)) {
+					$code = decbin(ord($data{0})) . decbin(ord($data{1}));
+					$code = bindec($code);
+				} else {
+					$code = 'Unspecified';
+				}
+				$this->info('Connection close request with reason: ' . $code);
+				$this->closeConnection($this->connections[$connection_id]->socket);
+				break;
+			case 0x9: $this->debug('Ping request.'); break;
+			case 0xA: $this->debug('Pong response.'); break;
+			case 0xB:
+			case 0xC:
+			case 0xD:
+			case 0xF: $this->warning("OPTCODE {$message['OPTCODE']} is reserverd!"); break;
+			default: $this->error("OPTCODE {$message['OPTCODE']} is reserverd!");
 		}
 			
 		return $data;
